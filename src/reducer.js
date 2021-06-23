@@ -1,7 +1,20 @@
-import { INCREASE, DECREASE, CLEAR_CART, REMOVE } from "./action";
+import {
+  INCREASE,
+  DECREASE,
+  CLEAR_CART,
+  REMOVE,
+  GET_TOTALS,
+  TOGGLE_AMOUNT,
+} from "./action";
 import cartItems from "./cart-items";
 
-function reducer(state, action) {
+const initialStore = {
+  cart: cartItems,
+  total: 0,
+  amount: 0,
+};
+
+function reducer(state = initialStore, action) {
   console.log({ state, action });
 
     if (action.type === "CLEAR_CART") {
@@ -14,12 +27,40 @@ function reducer(state, action) {
     }
 
     if (action.type === DECREASE)
+     //  if(action.payload.amount === 1) {
+      //    console.log("heyy");
     {
         console.log("decrease value");
+       let tempCart = state.cart.map((cartItem) => {
+           if (cartItem.id === action.payload.id) {
+                   cartItem = { ...cartItem, amount: cartItem.amount - 1 };
+                 }
+                 return cartItem;
+
+                 //console.log(cartItem);
+               });
+          
+        return {
+          ...state,
+          cart: tempCart
+        }
     }
    
     if (action.type === INCREASE) {
       console.log("increase value");
+      let tempCart = state.cart.map((cartItem) => {
+        if(cartItem.id === action.payload.id)
+        {
+          cartItem = {...cartItem, amount: cartItem.amount + 1};
+        }
+        return cartItem;  
+      
+        //console.log(cartItem);
+      })
+      return {
+        ...state,
+        cart: tempCart
+      }
     }
 
     if (action.type === REMOVE) {
@@ -65,8 +106,51 @@ function reducer(state, action) {
   //     count: 0,
   //   };
   // }
+     if (action.type == GET_TOTALS) {
+          console.log("Totals")
+          let { total, amount} = state.cart.reduce((cartTotal, cartItem) => 
+          {
+            const { price, amount} = cartItem;
+            const itemTotal = price * amount;
 
-  return state;
+             cartTotal.total += itemTotal;
+            cartTotal.amount += amount;
+            return cartTotal;
+          }, {
+            total: 0,
+            amount: 0
+          });
+
+          total = parseFloat(total.toFixed(2));
+          return {
+            ...state,
+            total, amount
+          }
+     } 
+
+     if (action.type === TOGGLE_AMOUNT) 
+     {
+      return {
+        ...state,
+        cart: state.cart.map(cartItem => {
+          if(cartItem.id === action.payload.id)
+          {
+           if(action.payload.toggle === 'inc')
+           {
+             return (cartItem = {...cartItem, amount: cartItem.amount + 1});
+           } 
+
+           if (action.payload.toggle === "dec") {
+             return (cartItem = { 
+               ...cartItem, 
+               amount: cartItem.amount - 1 });
+           } 
+          }
+          return cartItem  
+        })
+      }
+     } 
+     return state;
   console.log("React Redux");
 }
 
